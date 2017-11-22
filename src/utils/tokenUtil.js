@@ -1,0 +1,5 @@
+const tokenUtil = {
+  token:
+    "dGltZT0xNTExMjI0NTIxNDgwJm51bT1ZS0k4OSZhY2Nlc3NUb2tlbj1leDM3MkwxRjZEU0R4TllhSDRhc2tPZS9zVWYvWURzQiZ2ZXJzaW9uPTEuMC4zJmFwcElkPWUzOWEwOTk2MjVmMjRhY2RhN2RhZTdkMmUxNWNkOTZhJnBsYXRmb3JtPWFuZHJvaWQmcGhvbmVVVUlEPWJkODRkZWZhOGQzMjQ5ZTRhYjM5OWI5NmZmZTllYWEx"
+};
+export default tokenUtil;
