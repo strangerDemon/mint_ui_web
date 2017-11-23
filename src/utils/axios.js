@@ -16,7 +16,7 @@ const instance = axios.create({
   // baseURL: '//localhost:2080/api/',
   // baseURL: '//localhost:2323',
   baseURL: 'http://www.ztgis.com:8886/esri320/dist',  //发布的地址
-  timeout: 30000,
+  timeout: 60000,
   headers: {
     // 'X-Custom-Header': 'foobar',
     // // true: need, false: dont need

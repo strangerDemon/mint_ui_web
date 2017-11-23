@@ -10,6 +10,8 @@ const state = {
 
   topicMap:[],//当前专题图信息
 
+  topicMapDefault:[],//编辑的点的 原始 默认值
+
   topicEditList: [],//权限专题图
   countryMapList: [], //国家地图
   mapList: [], //厦门图层
@@ -44,11 +46,20 @@ const mutations = {
       topicMapId:info.topicMapId
     })
     .then(function(resp) {
-      alert(resp)
       state.topicMapId=info.topicMapId
       state.topicMap = resp;
     });
   },
+
+  requestTopicMapDefault(state,info){
+    asmx.post("getTFeatureByOID", {
+      id: info.id,
+    })
+    .then(function(resp) {
+      state.topicMapDefault = resp;
+    });
+  },
+
   setMap(state, info) {
     state.esriMap = info.map;
   },

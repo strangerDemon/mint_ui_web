@@ -14,7 +14,7 @@
       </div>
       <!-- 单选-->
       <div v-else-if="item.control_type==3" :id="'div'+item.id">
-        <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear>
+        <mt-field readonly :label="item.fieldCnName" v-model="configSelectDataShow[index]" disableClear>
           <span class="dropDown" @click="openPicker(index)"></span>
         </mt-field>
         <mt-popup ref="picker" :id="index" v-model="configSelectDiv[index]" position="bottom" style="width: 100%;">
@@ -24,7 +24,7 @@
       </div>
       <!-- 复选-->
       <div v-else-if="item.control_type==4" :id="'div'+item.id">
-        <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear >
+        <mt-field readonly :label="item.fieldCnName" v-model="configSelectDataShow[index]" disableClear >
            <span class="dropDown" @click="openPicker(index)"></span>
         </mt-field>
         <mt-popup ref="picker" :id="index" v-model="configSelectDiv[index]" position="bottom" style="width: 100%;">
@@ -64,9 +64,15 @@ export default {
   data() {
     return {
       username: "",
-      config: null,
-      configData: [],
-      configSelectDiv: [],
+
+      config: null, //formConfig
+      configDefault: null, //old  Value
+
+      configData: [], //提交的值
+      //为了实现下来框和下来复选框 组合mt-popup 和radio checklist添加的变量
+      configSelectDiv: [], //下拉框显示
+      configSelectDataShow: [], //下拉框的input框显示label
+
       actions: [
         {
           name: "拍照",
@@ -86,9 +92,8 @@ export default {
     "$store.state.mapInfo.topicMap"(val) {
       let vm = this;
       val.formConfig = val.formConfig.replace(/"name"/g, '"label"');
-      alert(val.formConfig);
-      console.log(val.formConfig);
       vm.config = eval("(" + val.formConfig + ")");
+      console.log(vm.config);
       vm.config.forEach(function(data) {
         let value = data.defaultValue == undefined ? "" : data.defaultValue;
         if (["3", "4", "5"].indexOf(data.control_type) >= 0) {
@@ -98,21 +103,43 @@ export default {
         }
         if (data.control_type == 4) {
           vm.configData.push([]);
+          vm.configSelectDataShow.push([]);
         } else {
           vm.configData.push(value + "");
+          vm.configSelectDataShow.push("");
         }
       });
-      console.log(vm.configData, vm.configSelectDiv);
+    },
+    configData(val) {
+      let vm = this;
+      for (let i = 0, length = vm.config.length; i < length; i++) {
+        let select=""
+        if (vm.config[i].formData != undefined) {
+          vm.config[i].formData.forEach(function(data){
+            if(vm.configData[i].indexOf(data.value)>=0){
+              select+=data.label+",";
+            }
+          })
+          Vue.set(vm.configSelectDataShow, i, select.substring(0,select.length-1));
+        }
+      }
+      console.log(vm.configSelectDataShow);
+    },
+    //原始值 初始化
+    "$store.state.mapInfo.topicMapDefault"(val) {
+      console.log(val);
+      this.configDefault = eval("(" + val + ")");
+      this.initDefault();
     }
   },
   methods: {
-    onValuesChange(picker, values) {
-      if (values[0] > values[1]) {
-        picker.setSlotValue(1, values[0]);
-      }
+    //默认值 初始化 提出
+    initDefault() {
+      let vm = this;
+      vm.configDefault.forEach(function(data) {});
     },
     camera(word) {
-      console.log(word); 
+      console.log(word);
       let fireOnThis = document.getElementById("cameraInput");
       let evObj = document.createEvent("MouseEvents");
       evObj.initMouseEvent(
@@ -145,17 +172,19 @@ export default {
     handleConfirm(index) {
       let vm = this;
       let d = new Date(this.configSelectDiv[index]);
-      Vue.set(this.configData,index,d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate());
+      Vue.set(
+        this.configData,
+        index,
+        d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate()
+      );
     },
     //照片处理
     // vue 不能监测到数组值的变化，要用vue.set才能获取到变化操作
     imageSheet(index) {
       Vue.set(this.configSelectDiv, index, true);
-      console.log(this.configSelectDiv);
     },
     deleteImage(index) {
       Vue.set(this.configSelectDiv, index, false);
-      console.log(this.configSelectDiv);
     },
     saveData() {
       console.log(this.configData);
@@ -187,7 +216,7 @@ export default {
 </script>
 <style lang="css" scoped>
 .saveButton {
-  position: absolute;
+  position: fixed;
   bottom: 0;
 }
 

@@ -20,7 +20,7 @@ const instance = axios.create({
   // baseURL: '//localhost:2080/api/',
   baseURL: 'http://192.168.1.100:86/xmtdt.asmx/',//'http://www.ztgis.com:8886/xmtdt.asmx/',
   // baseURL: '//localhost:44/dist',  //发布的地址
-  timeout: 30000,
+  timeout: 60000,
   headers: {
     // 'X-Custom-Header': 'foobar',
     // // true: need, false: dont need
