@@ -44,6 +44,7 @@ const mutations = {
       topicMapId:info.topicMapId
     })
     .then(function(resp) {
+      alert(resp)
       state.topicMapId=info.topicMapId
       state.topicMap = resp;
     });
