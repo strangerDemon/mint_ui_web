@@ -8,11 +8,9 @@ const state = {
   esriMap: null, //地图
   topicMapId: "", //当前选中的专题图id
 
-  topicMap:[],//当前专题图信息
+  topicMap: [], //当前专题图信息
 
-  topicMapDefault:[],//编辑的点的 原始 默认值
-
-  topicEditList: [],//权限专题图
+  topicEditList: [], //权限专题图
   countryMapList: [], //国家地图
   mapList: [], //厦门图层
   nodeList: [] //厦门注记图层
@@ -30,7 +28,8 @@ const getters = {};
  */
 const mutations = {
   requsetTopicEditList(state, info) {
-    asmx.post("getAuthTopicMapEditList", {
+    asmx
+      .post("getAuthTopicMapEditList", {
         account: info.account,
         password: info.password
       })
@@ -39,32 +38,37 @@ const mutations = {
       });
   },
 
-  requestTopicMapById(state,info){
-    asmx.post("getAuthTopicMapById", {
-      account: info.account,
-      password: info.password,
-      topicMapId:info.topicMapId
-    })
-    .then(function(resp) {
-      state.topicMapId=info.topicMapId
-      state.topicMap = resp;
-    });
+  requestTopicMapById(state, info) {
+    asmx
+      .post("getAuthTopicMapById", {
+        account: info.account,
+        password: info.password,
+        topicMapId: info.topicMapId,
+        OID:info.oid
+      })
+      .then(function(resp) {
+        state.topicMapId = info.topicMapId;
+        state.topicMap = resp;
+      });
   },
 
-  requestTopicMapDefault(state,info){
-    asmx.post("getTFeatureByOID", {
-      id: info.id,
-    })
-    .then(function(resp) {
-      state.topicMapDefault = resp;
-    });
+  tmapEdit(state, info) {
+    asmx
+      .post("tmapEdit", {
+        TID: info.tid,
+        bsm: info.bsm,
+        edits: info
+      })
+      .then(function(resp) {
+        console.log(resp);
+      });
   },
 
   setMap(state, info) {
     state.esriMap = info.map;
   },
 
-  setTopicMapId(state,info){
+  setTopicMapId(state, info) {
     state.topicMapId = info.topicMapId;
   },
 

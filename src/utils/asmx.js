@@ -18,7 +18,7 @@ import store from '../store/index.js'
 const instance = axios.create({
   // // TODO: full base url
   // baseURL: '//localhost:2080/api/',
-  baseURL: 'http://192.168.1.100:86/xmtdt.asmx/',//'http://www.ztgis.com:8886/xmtdt.asmx/',
+  baseURL: 'http://www.ztgis.com:8886/xmtdt.asmx/',
   // baseURL: '//localhost:44/dist',  //发布的地址
   timeout: 60000,
   headers: {
