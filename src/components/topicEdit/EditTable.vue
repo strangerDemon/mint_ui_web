@@ -7,23 +7,25 @@
         :attr="{ maxlength: validation[index].maxLength}" @blur.native.capture="checkValidation(index)"></mt-field>
         <!-- 时间选择器-->
         <div v-else-if="item.control_type==2" :id="'div'+item.id">
-          <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear>
+          <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear @focus.native.capture="openPicker(index)">
             <span class="dropDown" @click="openPicker(index)"></span>
           </mt-field>
-          <!-- <date-time-picker :date="configSelectDiv[index]" minDate="validation[index].minDate" 
-            maxDate="validation[index].maxDate" :dateFmt="validation[index].dateFmt" ></date-time-picker> -->
-          <mt-datetime-picker ref="picker" :id="index" v-model="configSelectDiv[index]" :type="validation[index].dateFmt.indexOf('HH')>0?'datetime':'date'"
+          <!-- <date-time-picker :date="configSelectDiv[index]"  :minDate="validation[index].minDate"  :maxDate="validation[index].maxDate" 
+              :dateFmt="validation[index].dateFmt" ></date-time-picker> -->
+           <mt-datetime-picker ref="picker" :id="index" v-model="configSelectDiv[index]" :type="validation[index].dateFmt.indexOf('HH')>0?'datetime':'date'"
               year-format="{value}年"
               month-format="{value}月"
               date-format="{value}日"
               hour-format="{value}时"
               minute-format="{value}分"
-             @confirm="handleConfirm(index)" :startDate="new Date(validation[index].minDate)" :endDate="new Date(validation[index].maxDate)">
+             @confirm="handleConfirm(index)" 
+             :startDate="validation[index].minDate!=''?new Date(validation[index].minDate):new Date(1970,0,1)" 
+             :endDate="validation[index].maxDate!=''?new Date(validation[index].maxDate):new Date((new Date()).getYear()+1910,11,31)">
           </mt-datetime-picker>
         </div>
         <!-- 单选-->
         <div v-else-if="item.control_type==3" :id="'div'+item.id">
-          <mt-field readonly :label="item.fieldCnName" v-model="configSelectDataShow[index]" disableClear>
+          <mt-field readonly :label="item.fieldCnName" v-model="configSelectDataShow[index]" disableClear @focus.native.capture="openPicker(index)">
             <span class="dropDown" @click="openPicker(index)"></span>
           </mt-field>
           <mt-popup ref="picker" :id="index" v-model="configSelectDiv[index]" position="bottom" style="width: 100%;">
@@ -33,7 +35,7 @@
         </div>
         <!-- 复选-->
         <div v-else-if="item.control_type==4" :id="'div'+item.id">
-          <mt-field readonly :label="item.fieldCnName" v-model="configSelectDataShow[index]" disableClear>
+          <mt-field readonly :label="item.fieldCnName" v-model="configSelectDataShow[index]" disableClear @focus.native.capture="openPicker(index)">
             <span class="dropDown" @click="openPicker(index)"></span>
           </mt-field>
           <mt-popup ref="picker" :id="index" v-model="configSelectDiv[index]" position="bottom" style="width: 100%;">
@@ -47,7 +49,7 @@
           </mt-field>
           <div class="uploadShowDiv">
               <div v-show="configData[index]!=''" class="uploadImage">
-                <img :src="uploadPath+configData[index].replace(/\\/g,'/')" class="uploadShowImage" />
+                <img :src="fullImageUrl[index]" class="uploadShowImage" />
                 <span class="error" @click="deleteImage(index)"></span>
               </div>
               <img v-show="configData[index]==''" src="../../../static/img/add.png" class="uploadIcon"  @click="camera(index)" />
@@ -95,18 +97,8 @@ export default {
       configSelectDiv: [], //下拉框显示
       configSelectDataShow: [], //下拉框的input框显示label
 
-      uploadPath: "", //文件上传的地址 eg："http://www.ztgis.com" 不包含剩下的相对路径部分
-
-      actions: [
-        {
-          name: "拍照",
-          method: () => this.camera("拍照")
-        },
-        {
-          name: "从相册中选取",
-          method: () => this.camera("从相册中选取")
-        }
-      ]
+      fullImageUrl: [], //图片显示全路径
+      fileHttpPath:"",//编辑时基础url
     };
   },
   props: {},
@@ -124,29 +116,52 @@ export default {
     //包含编辑时的默认值
     "$store.state.mapInfo.topicMap"(val) {
       let vm = this;
-      val.formConfig = val.formConfig.replace(/"name"/g, '"label"');
+      vm.fileHttpPath=val.fileHttpUrl;
+      val.formConfig = val.formConfig.toString().replace(/"name"/g, '"label"');
       vm.config = eval("(" + val.formConfig + ")");
+      console.log("config",vm.config);
       vm.config.forEach(function(data) {
         let value = data.defaultValue == undefined ? "" : data.defaultValue;
+        value =
+          data.fieldValue == undefined || data.fieldValue == ""
+            ? value
+            : data.fieldValue;
+            console.log(data,value);
         if (["3", "4", "5"].indexOf(data.control_type) >= 0) {
           vm.configSelectDiv.push(false);
         } else if (["2"].indexOf(data.control_type) >= 0) {
-          vm.configSelectDiv.push(new Date(value));
-          console.log(value);
+          if (value == "") {
+            vm.configSelectDiv.push(new Date());
+          } else {
+            vm.configSelectDiv.push(new Date(value));
+          }
         } else {
           vm.configSelectDiv.push("");
         }
         if (data.control_type == 4) {
-          vm.configData.push([]);
-          vm.configSelectDataShow.push([]);
+          if (value == "") {
+            vm.configData.push([]);
+            vm.configSelectDataShow.push([]);
+          } else {
+            vm.configData.push(value.split(","));
+            vm.configSelectDataShow.push(value.split(","));
+          }
         } else {
           vm.configData.push(value + "");
           vm.configSelectDataShow.push("");
         }
         vm.validation.push(data.formValidation);
+        vm.fullImageUrl = new Array(vm.config.length).fill("");
       });
+      console.log(vm.configData,vm.configSelectDataShow);
     },
     configData(val) {
+      this.doConfigData();
+    }
+  },
+  methods: {
+    //config Data 数据变化后手动执行
+    doConfigData() {
       let vm = this;
       for (let i = 0, length = vm.config.length; i < length; i++) {
         let select = "";
@@ -163,14 +178,14 @@ export default {
           );
         }
       }
-    }
-  },
-  methods: {
+    },
     camera(index) {
       let fireOnThis = document.getElementById("cameraInput" + index);
       if (this.getIos()) {
         fireOnThis.removeAttribute("capture");
       }
+      //fireOnThis.click();
+      //android 4.4 cannot click
       let evObj = document.createEvent("MouseEvents");
       evObj.initMouseEvent(
         "click",
@@ -194,7 +209,7 @@ export default {
     cameraInputChange(evt) {
       let vm = this;
       let cameraInput = $(evt.target);
-      let index = cameraInput[0].id.substring(11, 12);
+      let index = cameraInput[0].id.substring(11);
       let files = evt.target.files || evt.dataTransfer.files;
       let formData = new FormData();
       formData.append("fileData", files[0]);
@@ -202,13 +217,13 @@ export default {
         .asmxAjax("tmapUploadFile", formData, { TID: vm.param.topicMapId })
         .then(function(resp) {
           let result = eval("(" + resp + ")");
-          vm.uploadPath = result.Results.filtHttpUrl.substring(
-            0,
-            result.Results.filtHttpUrl.indexOf(
-              result.Results.fileUrl.replace(/\\/g, "/")
-            )
+          Vue.set(
+            vm.fullImageUrl,
+            index,
+            result.Results.fileHttpUrl.replace(/\\/g, "/")
           );
           Vue.set(vm.configData, index, result.Results.fileUrl);
+          vm.doConfigData(); //囧，i dont konw why 搞事情
         });
     },
     //judge is ios or not
@@ -233,22 +248,22 @@ export default {
       let d = new Date(vm.configSelectDiv[index]);
       let dataFmt = vm.validation[index].dateFmt;
       let dateTsring = "";
-      if (dataFmt.indexOf("yyyy")) {
+      if (dataFmt.indexOf("yyyy") >= 0) {
         dateTsring += d.getFullYear();
       }
-      if (dataFmt.indexOf("MM")) {
+      if (dataFmt.indexOf("MM") >= 0) {
         dateTsring += "-" + (d.getMonth() + 1);
       }
-      if (dataFmt.indexOf("dd")) {
+      if (dataFmt.indexOf("dd") >= 0) {
         dateTsring += "-" + d.getDate();
       }
-      if (dataFmt.indexOf("HH")) {
+      if (dataFmt.indexOf("HH") >= 0) {
         dateTsring += " " + d.getHours();
       }
-      if (dataFmt.indexOf(":mm")) {
+      if (dataFmt.indexOf(":mm") >= 0) {
         dateTsring += ":" + d.getMinutes();
       }
-      if (dataFmt.indexOf("ss")) {
+      if (dataFmt.indexOf("ss") >= 0) {
         dateTsring += ":" + d.getSeconds();
       }
 
@@ -260,8 +275,8 @@ export default {
       Vue.set(this.configSelectDiv, index, true);
     },
     deleteImage(index) {
+      Vue.set(this.fullImageUrl, index, "");
       Vue.set(this.configData, index, "");
-      this.uploadPath = "";
     },
     //表单验证
     checkValidation(index) {
@@ -284,7 +299,6 @@ export default {
     },
     saveData() {
       let vm = this;
-      console.log(vm.configData);
       vm.$store.commit("tmapEdit", {
         TID: vm.param.topicMapId,
         bsm: vm.param.bsm,
@@ -315,11 +329,6 @@ export default {
       topicMapId: vm.param.topicMapId,
       oid: vm.param.oid
     });
-    if (vm.param.oid != null && vm.param.oid != "") {
-      vm.$store.commit("requestTopicMapDefault", {
-        oid: vm.param.oid
-      });
-    }
     vm.$store.commit("setUserInfo", {
       account: vm.param.account,
       password: vm.param.password
@@ -343,7 +352,8 @@ export default {
 }
 
 .uploadShowDiv {
-  width: calc(100vw - 20px);
+  /* 安卓4.4 不支持calc */
+  /* width: calc(100vw - 20px); */
   height: 35vh;
   min-width: 100px;
   min-height: 100px;
@@ -355,7 +365,8 @@ export default {
 .uploadShowImage {
   position: relative;
   height: 100%;
-  width: 100%;
+  width: auto;
+  text-align: center;
 }
 
 .uploadImage .error {
@@ -371,8 +382,12 @@ export default {
 
 .uploadIcon {
   position: relative;
-  left: calc(50vw - 50px);
-  top: calc(17.5vh - 35px); /*Math.max((35vh -100px)/2+ 48px,48px*/
+  cursor: pointer;
+  /* left: calc(50vw - 50px);
+  top: calc(17.5vh - 35px); */
+  top: 50%;
+  left: 50%;
+  margin: -50px 0 0 -50px;
 }
 
 .dropDown {
