@@ -30,7 +30,7 @@
           </mt-field>
           <mt-popup ref="picker" :id="index" v-model="configSelectDiv[index]" position="bottom" style="width: 100%;">
             <mt-radio :title="item.fieldCnName+'(单选)'" align="right" v-model="configData[index]" :options="item.formData">
-            </mt-radio>
+            </mt-radio> 
           </mt-popup>
         </div>
         <!-- 复选-->
@@ -66,12 +66,15 @@
 </template>
 
 <script>
+import Vue from "vue";
+import { Toast } from "../../../node_modules/mint-ui";
+
 import * as regExp from "../../utils/regExp.js";
 import tokenUtil from "../../utils/tokenUtil";
-import { Toast } from "../../../node_modules/mint-ui";
-import Vue from "vue";
 import asmxUploadFile from "@/utils/asmxUploadFile.js";
-import DateTimePicker from "../topicEdit/DateTimePicker";
+
+import DateTimePicker from "./DateTimePicker";
+
 export default {
   name: "topicMapEditTable",
   directives: {},
@@ -98,7 +101,7 @@ export default {
       configSelectDataShow: [], //下拉框的input框显示label
 
       fullImageUrl: [], //图片显示全路径
-      fileHttpPath:"",//编辑时基础url
+      fileHttpPath: "" //编辑时基础url
     };
   },
   props: {},
@@ -116,17 +119,15 @@ export default {
     //包含编辑时的默认值
     "$store.state.mapInfo.topicMap"(val) {
       let vm = this;
-      vm.fileHttpPath=val.fileHttpUrl;
+      vm.fileHttpPath = val.fileHttpUrl;
       val.formConfig = val.formConfig.toString().replace(/"name"/g, '"label"');
       vm.config = eval("(" + val.formConfig + ")");
-      console.log("config",vm.config);
       vm.config.forEach(function(data) {
         let value = data.defaultValue == undefined ? "" : data.defaultValue;
         value =
           data.fieldValue == undefined || data.fieldValue == ""
             ? value
             : data.fieldValue;
-            console.log(data,value);
         if (["3", "4", "5"].indexOf(data.control_type) >= 0) {
           vm.configSelectDiv.push(false);
         } else if (["2"].indexOf(data.control_type) >= 0) {
@@ -151,9 +152,8 @@ export default {
           vm.configSelectDataShow.push("");
         }
         vm.validation.push(data.formValidation);
-        vm.fullImageUrl = new Array(vm.config.length).fill("");
+        vm.fullImageUrl.push(vm.fileHttpPath + value);
       });
-      console.log(vm.configData,vm.configSelectDataShow);
     },
     configData(val) {
       this.doConfigData();
@@ -287,6 +287,7 @@ export default {
         let regular = new RegExp(valid.regularExp);
         if (!regular.test(vm.configData[index])) {
           Toast(vm.config[index].fieldCnName + ":" + valid.tip);
+          return false;
         }
       }
       if (
@@ -295,14 +296,27 @@ export default {
       ) {
         //不可为空
         Toast(vm.config[index].fieldCnName + ":不可为空");
+        return false;
       }
+      return true;
     },
     saveData() {
       let vm = this;
+      let commit = {};
+      if (vm.param.operation == "edit") {
+        commit["OBJECTID"] = parseInt(vm.param.oid);
+      }
+      for (let i = 0, length = vm.config.length; i < length; i++) {
+        if (!vm.checkValidation(i)) {
+          return;
+        }
+        commit[vm.config[i].fieldEnName] = vm.configData[i].toString();
+      }
       vm.$store.commit("tmapEdit", {
         TID: vm.param.topicMapId,
         bsm: vm.param.bsm,
-        edits: vm.configData
+        configData: commit,
+        method: vm.param.operation
       });
     }
   },
@@ -349,6 +363,8 @@ export default {
 .saveButton {
   position: fixed;
   bottom: 0;
+  min-height: 60px;
+  border-radius: 0px;
 }
 
 .uploadShowDiv {
@@ -375,8 +391,8 @@ export default {
   /*等比缩放*/
   position: absolute;
   right: -10px;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   top: -10px;
 }
 

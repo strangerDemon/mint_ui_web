@@ -1,5 +1,7 @@
 import * as country from "@/api/esriLib/init";
 import { asmx } from "@/utils";
+import { Toast } from "../../../node_modules/mint-ui";
+import Router from "@/router";
 /**
  * Initial state
  * @type {Object}
@@ -44,7 +46,7 @@ const mutations = {
         account: info.account,
         password: info.password,
         topicMapId: info.topicMapId,
-        OID:info.oid
+        OID: info.oid
       })
       .then(function(resp) {
         state.topicMapId = info.topicMapId;
@@ -53,14 +55,30 @@ const mutations = {
   },
 
   tmapEdit(state, info) {
+    let attributes = {
+      attributes: info.configData
+    };
+    let edits =
+      info.method == "add"
+        ? {
+            add: attributes
+          }
+        : { update: attributes };
     asmx
       .post("tmapEdit", {
-        TID: info.tid,
+        TID: info.TID,
         bsm: info.bsm,
-        edits: info
+        edits: edits
       })
       .then(function(resp) {
-        console.log(resp);
+        if (resp.adds[0].success == 1) {
+          Toast("操作成功");
+          Router.push({
+            name: "Success"
+          });
+        } else {
+          Toast("操作失败");
+        }
       });
   },
 
