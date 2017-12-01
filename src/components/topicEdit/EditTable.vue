@@ -43,7 +43,7 @@
             </mt-checklist>
           </mt-popup>
         </div>
-        <!--选择照片-->
+        <!--选择照片 if use webView it`s support android 5.0+-->
         <div v-else-if="item.control_type==5" :id="'div'+item.id">
           <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear  type="hidden">
           </mt-field>
@@ -72,13 +72,12 @@ import { Toast } from "../../../node_modules/mint-ui";
 import * as regExp from "../../utils/regExp.js";
 import tokenUtil from "../../utils/tokenUtil";
 import asmxUploadFile from "@/utils/asmxUploadFile.js";
-
-import DateTimePicker from "./DateTimePicker";
+import * as  platform from "@/utils/platform.js";
 
 export default {
   name: "topicMapEditTable",
   directives: {},
-  components: { DateTimePicker },
+  components: {},
   data() {
     return {
       param: {
@@ -181,7 +180,7 @@ export default {
     },
     camera(index) {
       let fireOnThis = document.getElementById("cameraInput" + index);
-      if (this.getIos()) {
+      if (platform.isIos()) {
         fireOnThis.removeAttribute("capture");
       }
       //fireOnThis.click();
@@ -225,15 +224,6 @@ export default {
           Vue.set(vm.configData, index, result.Results.fileUrl);
           vm.doConfigData(); //囧，i dont konw why 搞事情
         });
-    },
-    //judge is ios or not
-    getIos() {
-      let ua = navigator.userAgent.toLowerCase();
-      if (ua.match(/iPhone\sOS/i) == "iphone os") {
-        return true;
-      } else {
-        return false;
-      }
     },
     openPicker(index) {
       this.$refs.picker.forEach(function(picker) {
