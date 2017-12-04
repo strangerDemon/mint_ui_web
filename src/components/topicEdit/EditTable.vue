@@ -10,8 +10,6 @@
           <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear @focus.native.capture="openPicker(index)">
             <span class="dropDown" @click="openPicker(index)"></span>
           </mt-field>
-          <!-- <date-time-picker :date="configSelectDiv[index]"  :minDate="validation[index].minDate"  :maxDate="validation[index].maxDate" 
-              :dateFmt="validation[index].dateFmt" ></date-time-picker> -->
            <mt-datetime-picker ref="picker" :id="index" v-model="configSelectDiv[index]" :type="validation[index].dateFmt.indexOf('HH')>0?'datetime':'date'"
               year-format="{value}年"
               month-format="{value}月"
@@ -106,16 +104,7 @@ export default {
   props: {},
   computed: {},
   watch: {
-    //[
-    //  {"control_type":"1","id":17,"fieldEnName":"POICODE","fieldCnName":"编码","formType":1,"defaultValue":"","formValidation":{"isNull":1,"maxLength":"50","regularExp":"","tip":""}},
-    //  {"control_type":"1","id":12,"fieldEnName":"NAME","fieldCnName":"名称","formType":1,"defaultValue":"","formValidation":{"isNull":1,"maxLength":"50","regularExp":"","tip":""}},
-    //  {"control_type":"1","id":25,"fieldEnName":"CLASSID","fieldCnName":"分类编码","formType":1,"defaultValue":"","formValidation":{"isNull":1,"maxLength":"30","regularExp":"","tip":""}},
-    //  {"control_type":"1","id":26,"fieldEnName":"DMBM","fieldCnName":"地名编码","formType":1,"defaultValue":"1234","formValidation":{"isNull":1,"maxLength":"8","regularExp":"/^[1-9]*[1-9][0-9]*$/","tip":"请输入正整数"}},
-    //  {"control_type":"2","id":13,"fieldCnName":"测绘时间","fieldEnName":"CHSJ","formType":2,"defaultValue":"2017-11-15","formValidation":{"isNull":0,"minDate":"2012-01-01","maxDate":"2020-01-01","dateFmt":"yyyy-MM-dd"}},
-    //  {"control_type":"3","id":14,"fieldCnName":"兴趣点等级","fieldEnName":"显示等级","formType":3,"formData":[{"value":"1","label":"一级"},{"value":"2","label":"二级"},{"value":"3","label":"三级"},{"value":"4","label":"四级"},{"value":"5","label":"五级"},{"value":"6","label":"六级"}],"formValidation":{"isNull":0}},
-    //  {"control_type":"4","id":15,"fieldCnName":"类别","fieldEnName":"TYPE","formType":4,"formData":[{"value":"1001","label":"类别1"},{"value":"1002","label":"类别2"},{"value":"1003","label":"类别3"}],"formValidation":{"isNull":0}},
-    //  {"control_type":"5","id":16,"fieldCnName":"图片","fieldEnName":"IMAGE_","formType":5,"formData":[],"formValidation":{"isNull":1},"fileConfig":{"dataType":"JPG","filePath":"D:\\天地图手机端采集","fileMaxSize":"10"}}]
-    //包含编辑时的默认值
+     //包含编辑时的默认值
     "$store.state.mapInfo.topicMap"(val) {
       let vm = this;
       vm.fileHttpPath = val.fileHttpUrl;

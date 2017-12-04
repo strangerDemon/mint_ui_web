@@ -71,7 +71,10 @@ const mutations = {
         edits: edits
       })
       .then(function(resp) {
-        if (resp.adds[0].success == 1) {
+        if (
+          (resp.adds != undefined && resp.adds[0].success == 1) ||
+          (resp.updates != undefined && resp.updates[0].success == 1)
+        ) {
           Toast("操作成功");
           Router.push({
             name: "Success"

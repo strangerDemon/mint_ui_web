@@ -30,11 +30,10 @@ webview.setWebChromeClient(new WebChromeClient() {
     }
 );
 
+list:
+
+![image](https://github.com/strangerDemon/mint_ui_web/blob/master/gif/list.gif)
 
 table:
-
-![image](https://github.com/strangerDemon/mint_ui_web/blob/master/gif/indexTable.gif)
-
-table2:
 
 ![image](https://github.com/strangerDemon/mint_ui_web/blob/master/gif/table2.gif)

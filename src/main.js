@@ -9,7 +9,6 @@ import plugins from './plugins'
 import store from './store'
 import * as esriLoader from 'esri-loader'
 
-
 // ## Import styles
 // =========================
 //import 'element-ui/lib/theme-default/index.css'
@@ -21,7 +20,6 @@ import 'mint-ui/lib/style.css'
 Vue.use(ElementUI)
 Vue.use(MintUi)
 Vue.use(plugins)
-
 
 // ## Config
 // =========================
