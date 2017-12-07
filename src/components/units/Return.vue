@@ -1,9 +1,6 @@
 <template>
   <div class="return">
-      <span class="prompt">操作成功</span> 
-      <div class="button">
-          <mt-button v-if="isAndroid" type="default" size="small" @click.native="window.bridge.clickOnJsOfClose()"> 返回 </mt-button>
-      </div>
+      <span class="prompt">操作成功</span>
   </div>
 </template>
 <script>
@@ -17,7 +14,8 @@ export default {
   components: {},
   data() {
     return {
-      isAndroid: false
+      isAndroid: false,
+      isIos: false
     };
   },
   props: {},
@@ -26,6 +24,11 @@ export default {
   methods: {
     init() {
       this.isAndroid = platform.isAndroid() && window.bridge != undefined;
+      this.isIos = platform.isIos();
+      if (this.isAndroid) {
+        window.bridge.clickOnJsOfClose();
+      } else if (this.isIos) {
+      }
     }
   },
   beforeCreate() {},
