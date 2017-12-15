@@ -3,22 +3,13 @@
     <div class="configFormDiv">
       <div v-for="(item,index) in config" :key="index">
         <!--简单编辑框-->
-        <mt-field v-if="item.control_type==1" :label="item.fieldCnName" v-model="configData[index]" :placeholder="item.fieldCnName"
-        :attr="{ maxlength: validation[index].maxLength}" @blur.native.capture="checkValidation(index)"></mt-field>
+        <mt-field v-if="item.control_type==1" :label="item.fieldCnName" v-model="configData[index]" :placeholder="item.fieldCnName" :attr="{ maxlength: validation[index].maxLength}" @blur.native.capture="checkValidation(index)"></mt-field>
         <!-- 时间选择器-->
         <div v-else-if="item.control_type==2" :id="'div'+item.id">
           <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear @focus.native.capture="openPicker(index)">
             <span class="dropDown" @click="openPicker(index)"></span>
           </mt-field>
-           <mt-datetime-picker ref="picker" :id="index" v-model="configSelectDiv[index]" :type="validation[index].dateFmt.indexOf('HH')>0?'datetime':'date'"
-              year-format="{value}年"
-              month-format="{value}月"
-              date-format="{value}日"
-              hour-format="{value}时"
-              minute-format="{value}分"
-             @confirm="handleConfirm(index)" 
-             :startDate="validation[index].minDate!=''?new Date(validation[index].minDate):new Date(1970,0,1)" 
-             :endDate="validation[index].maxDate!=''?new Date(validation[index].maxDate):new Date((new Date()).getYear()+1910,11,31)">
+          <mt-datetime-picker ref="picker" :id="index" v-model="configSelectDiv[index]" :type="validation[index].dateFmt.indexOf('HH')>0?'datetime':'date'" year-format="{value}年" month-format="{value}月" date-format="{value}日" hour-format="{value}时" minute-format="{value}分" @confirm="handleConfirm(index)" :startDate="validation[index].minDate!=''?new Date(validation[index].minDate):new Date(1970,0,1)" :endDate="validation[index].maxDate!=''?new Date(validation[index].maxDate):new Date((new Date()).getYear()+1910,11,31)">
           </mt-datetime-picker>
         </div>
         <!-- 单选-->
@@ -28,7 +19,7 @@
           </mt-field>
           <mt-popup ref="picker" :id="index" v-model="configSelectDiv[index]" position="bottom" style="width: 100%;">
             <mt-radio :title="item.fieldCnName+'(单选)'" align="right" v-model="configData[index]" :options="item.formData">
-            </mt-radio> 
+            </mt-radio>
           </mt-popup>
         </div>
         <!-- 复选-->
@@ -43,22 +34,23 @@
         </div>
         <!--选择照片 if use webView it`s support android 5.0+-->
         <div v-else-if="item.control_type==5" :id="'div'+item.id">
-          <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear  type="hidden">
+          <mt-field readonly :label="item.fieldCnName" v-model="configData[index]" disableClear type="hidden">
           </mt-field>
           <div class="uploadShowDiv">
-              <div v-show="configData[index]!=''" class="uploadImage">
-                <img :src="fullImageUrl[index]" class="uploadShowImage" />
-                <span class="error" @click="deleteImage(index)"></span>
-              </div>
-              <img v-show="configData[index]==''" src="../../../static/img/add.png" class="uploadIcon"  @click="camera(index)" />
+            <div v-show="configData[index]!=''" class="uploadImage">
+              <img :src="fullImageUrl[index]" class="uploadShowImage" />
+              <span class="error" @click="deleteImage(index)"></span>
+            </div>
+            <img v-show="configData[index]==''" src="../../../static/img/add.png" class="uploadIcon" @click="camera(index)" />
           </div>
-           <!--camera照相机；camcorder摄像机；microphone录音  multiple属性，表示可以支持多选 capture="camera" -->
+          <!--camera照相机；camcorder摄像机；microphone录音  multiple属性，表示可以支持多选 capture="camera" -->
           <input style="display:none;" capture="camera" type="file" accept="image/*" :id="'cameraInput'+index" @change="cameraInputChange" ref="cameraInput">
 
         </div>
       </div>
     </div>
-   
+    <div class="cover" v-show="loading"></div>
+    <vue-loading v-show="loading" type="spiningDubbles" :size="{ width: '50px', height: '50px' }"></vue-loading>
     <mt-button class="saveButton" type="primary" size="large" @click.native="saveData">保存</mt-button>
   </div>
 </template>
@@ -70,14 +62,15 @@ import { Toast } from "../../../node_modules/mint-ui";
 import * as regExp from "../../utils/regExp.js";
 import tokenUtil from "../../utils/tokenUtil";
 import asmxUploadFile from "@/utils/asmxUploadFile.js";
-import * as  platform from "@/utils/platform.js";
-
+import * as platform from "@/utils/platform.js";
+import vueLoading from "vue-loading-template";
 export default {
   name: "topicMapEditTable",
   directives: {},
-  components: {},
+  components: { vueLoading },
   data() {
     return {
+      loading: true,
       param: {
         //url 参数
         account: "",
@@ -104,7 +97,7 @@ export default {
   props: {},
   computed: {},
   watch: {
-     //包含编辑时的默认值
+    //包含编辑时的默认值
     "$store.state.mapInfo.topicMap"(val) {
       let vm = this;
       vm.fileHttpPath = val.fileHttpUrl;
@@ -166,6 +159,7 @@ export default {
           );
         }
       }
+      vm.loading=false;
     },
     camera(index) {
       let fireOnThis = document.getElementById("cameraInput" + index);
@@ -196,8 +190,9 @@ export default {
     },
     cameraInputChange(evt) {
       let vm = this;
-      let cameraInput = $(evt.target);
-      let index = cameraInput[0].id.substring(11);
+      vm.loading=true;
+      let cameraInput = evt.target; //document.getElementById(evt.target.id);//$(evt.target);
+      let index = cameraInput.id.substring(11);
       let files = evt.target.files || evt.dataTransfer.files;
       let formData = new FormData();
       formData.append("fileData", files[0]);
@@ -213,6 +208,7 @@ export default {
           Vue.set(vm.configData, index, result.Results.fileUrl);
           vm.doConfigData(); //囧，i dont konw why 搞事情
         });
+       vm.loading=false;
     },
     openPicker(index) {
       this.$refs.picker.forEach(function(picker) {
@@ -394,5 +390,21 @@ export default {
   height: 25px;
   right: -5px;
   top: -12px;
+}
+.loading {
+  color: aqua;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 30%;
+  left: 45%;
+}
+.cover{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-color: hsla(0,0%,100%,.9);
 }
 </style>
