@@ -56,355 +56,355 @@
 </template>
 
 <script>
-import Vue from "vue";
-import { Toast } from "../../../node_modules/mint-ui";
+  import Vue from "vue";
+  import { Toast } from "../../../node_modules/mint-ui";
 
-import * as regExp from "../../utils/regExp.js";
-import tokenUtil from "../../utils/tokenUtil";
-import asmxUploadFile from "@/utils/asmxUploadFile.js";
-import * as platform from "@/utils/platform.js";
-import vueLoading from "vue-loading-template";
-export default {
-  name: "topicMapEditTable",
-  directives: {},
-  components: { vueLoading },
-  data() {
-    return {
-      loading: true,
-      param: {
-        //url 参数
-        account: "",
-        password: "",
-        topicMapId: "",
-        oid: "",
-        bsm: "",
-        operation: "",
-        token: ""
-      },
-      config: null, //formConfig
-      //数据
-      configData: [], //提交的值
-      validation: [], //文本框校验
+  import * as regExp from "../../utils/regExp.js";
+  import tokenUtil from "../../utils/tokenUtil";
+  import asmxUploadFile from "@/utils/asmxUploadFile.js";
+  import * as platform from "@/utils/platform.js";
+  import vueLoading from "vue-loading-template";
+  export default {
+    name: "topicMapEditTable",
+    directives: {},
+    components: { vueLoading },
+    data() {
+      return {
+        loading: true,
+        param: {
+          //url 参数
+          account: "",
+          password: "",
+          topicMapId: "",
+          oid: "",
+          bsm: "",
+          operation: "",
+          token: ""
+        },
+        config: null, //formConfig
+        //数据
+        configData: [], //提交的值
+        validation: [], //文本框校验
 
-      //为了实现下来框和下来复选框 组合mt-popup 和radio checklist添加的变量
-      configSelectDiv: [], //下拉框显示
-      configSelectDataShow: [], //下拉框的input框显示label
+        //为了实现下来框和下来复选框 组合mt-popup 和radio checklist添加的变量
+        configSelectDiv: [], //下拉框显示
+        configSelectDataShow: [], //下拉框的input框显示label
 
-      fullImageUrl: [], //图片显示全路径
-      fileHttpPath: "" //编辑时基础url
-    };
-  },
-  props: {},
-  computed: {},
-  watch: {
-    //包含编辑时的默认值
-    "$store.state.mapInfo.topicMap"(val) {
-      let vm = this;
-      vm.fileHttpPath = val.fileHttpUrl;
-      val.formConfig = val.formConfig.toString().replace(/"name"/g, '"label"');
-      vm.config = eval("(" + val.formConfig + ")");
-      vm.config.forEach(function(data) {
-        let value = data.defaultValue == undefined ? "" : data.defaultValue;
-        value =
-          data.fieldValue == undefined || data.fieldValue == ""
-            ? value
-            : data.fieldValue;
-        if (["3", "4", "5"].indexOf(data.control_type) >= 0) {
-          vm.configSelectDiv.push(false);
-        } else if (["2"].indexOf(data.control_type) >= 0) {
-          if (value == "") {
-            vm.configSelectDiv.push(new Date());
-          } else {
-            vm.configSelectDiv.push(new Date(value));
-          }
-        } else {
-          vm.configSelectDiv.push("");
-        }
-        if (data.control_type == 4) {
-          if (value == "") {
-            vm.configData.push([]);
-            vm.configSelectDataShow.push([]);
-          } else {
-            vm.configData.push(value.split(","));
-            vm.configSelectDataShow.push(value.split(","));
-          }
-        } else {
-          vm.configData.push(value + "");
-          vm.configSelectDataShow.push("");
-        }
-        vm.validation.push(data.formValidation);
-        vm.fullImageUrl.push(vm.fileHttpPath + value);
-      });
+        fullImageUrl: [], //图片显示全路径
+        fileHttpPath: "" //编辑时基础url
+      };
     },
-    configData(val) {
-      this.doConfigData();
-    }
-  },
-  methods: {
-    //config Data 数据变化后手动执行
-    doConfigData() {
-      let vm = this;
-      for (let i = 0, length = vm.config.length; i < length; i++) {
-        let select = "";
-        if (vm.config[i].formData != undefined) {
-          vm.config[i].formData.forEach(function(data) {
-            if (vm.configData[i].indexOf(data.value) >= 0) {
-              select += data.label + ",";
+    props: {},
+    computed: {},
+    watch: {
+      //包含编辑时的默认值
+      "$store.state.mapInfo.topicMap" (val) {
+        let vm = this;
+        vm.fileHttpPath = val.fileHttpUrl;
+        val.formConfig = val.formConfig.toString().replace(/"name"/g, '"label"');
+        vm.config = eval("(" + val.formConfig + ")");
+        vm.config.forEach(function(data) {
+          let value = data.defaultValue == undefined ? "" : data.defaultValue;
+          value =
+            data.fieldValue == undefined || data.fieldValue == "" ?
+            value :
+            data.fieldValue;
+          if (["3", "4", "5"].indexOf(data.control_type) >= 0) {
+            vm.configSelectDiv.push(false);
+          } else if (["2"].indexOf(data.control_type) >= 0) {
+            if (value == "") {
+              vm.configSelectDiv.push(new Date());
+            } else {
+              vm.configSelectDiv.push(new Date(value));
             }
-          });
-          Vue.set(
-            vm.configSelectDataShow,
-            i,
-            select.substring(0, select.length - 1)
-          );
-        }
-      }
-      vm.loading=false;
-    },
-    camera(index) {
-      let fireOnThis = document.getElementById("cameraInput" + index);
-      if (platform.isIos()) {
-        fireOnThis.removeAttribute("capture");
-      }
-      //fireOnThis.click();
-      //android 4.4 cannot click
-      let evObj = document.createEvent("MouseEvents");
-      evObj.initMouseEvent(
-        "click",
-        true,
-        true,
-        window,
-        1,
-        12,
-        345,
-        7,
-        220,
-        false,
-        false,
-        true,
-        false,
-        0,
-        null
-      );
-      fireOnThis.dispatchEvent(evObj);
-    },
-    cameraInputChange(evt) {
-      let vm = this;
-      vm.loading=true;
-      let cameraInput = evt.target; //document.getElementById(evt.target.id);//$(evt.target);
-      let index = cameraInput.id.substring(11);
-      let files = evt.target.files || evt.dataTransfer.files;
-      let formData = new FormData();
-      formData.append("fileData", files[0]);
-      asmxUploadFile
-        .asmxAjax("tmapUploadFile", formData, { TID: vm.param.topicMapId })
-        .then(function(resp) {
-          let result = eval("(" + resp + ")");
-          Vue.set(
-            vm.fullImageUrl,
-            index,
-            result.Results.fileHttpUrl.replace(/\\/g, "/")
-          );
-          Vue.set(vm.configData, index, result.Results.fileUrl);
-          vm.doConfigData(); //囧，i dont konw why 搞事情
+          } else {
+            vm.configSelectDiv.push("");
+          }
+          if (data.control_type == 4) {
+            if (value == "") {
+              vm.configData.push([]);
+              vm.configSelectDataShow.push([]);
+            } else {
+              vm.configData.push(value.split(","));
+              vm.configSelectDataShow.push(value.split(","));
+            }
+          } else {
+            vm.configData.push(value + "");
+            vm.configSelectDataShow.push("");
+          }
+          vm.validation.push(data.formValidation);
+          vm.fullImageUrl.push(vm.fileHttpPath + value);
         });
-       vm.loading=false;
+      },
+      configData(val) {
+        this.doConfigData();
+      }
     },
-    openPicker(index) {
-      this.$refs.picker.forEach(function(picker) {
-        if (picker.$el.id == index) {
-          picker.open();
+    methods: {
+      //config Data 数据变化后手动执行
+      doConfigData() {
+        let vm = this;
+        for (let i = 0, length = vm.config.length; i < length; i++) {
+          let select = "";
+          if (vm.config[i].formData != undefined) {
+            vm.config[i].formData.forEach(function(data) {
+              if (vm.configData[i].indexOf(data.value) >= 0) {
+                select += data.label + ",";
+              }
+            });
+            Vue.set(
+              vm.configSelectDataShow,
+              i,
+              select.substring(0, select.length - 1)
+            );
+          }
         }
-      });
-    },
-    //时间picker
-    handleConfirm(index) {
-      let vm = this;
-      let d = new Date(vm.configSelectDiv[index]);
-      let dataFmt = vm.validation[index].dateFmt;
-      let dateTsring = "";
-      if (dataFmt.indexOf("yyyy") >= 0) {
-        dateTsring += d.getFullYear();
-      }
-      if (dataFmt.indexOf("MM") >= 0) {
-        dateTsring += "-" + (d.getMonth() + 1);
-      }
-      if (dataFmt.indexOf("dd") >= 0) {
-        dateTsring += "-" + d.getDate();
-      }
-      if (dataFmt.indexOf("HH") >= 0) {
-        dateTsring += " " + d.getHours();
-      }
-      if (dataFmt.indexOf(":mm") >= 0) {
-        dateTsring += ":" + d.getMinutes();
-      }
-      if (dataFmt.indexOf("ss") >= 0) {
-        dateTsring += ":" + d.getSeconds();
-      }
+        vm.loading = false;
+      },
+      camera(index) {
+        let fireOnThis = document.getElementById("cameraInput" + index);
+        if (platform.isIos()) {
+          fireOnThis.removeAttribute("capture");
+        }
+        //fireOnThis.click();
+        //android 4.4 cannot click
+        let evObj = document.createEvent("MouseEvents");
+        evObj.initMouseEvent(
+          "click",
+          true,
+          true,
+          window,
+          1,
+          12,
+          345,
+          7,
+          220,
+          false,
+          false,
+          true,
+          false,
+          0,
+          null
+        );
+        fireOnThis.dispatchEvent(evObj);
+      },
+      cameraInputChange(evt) {
+        let vm = this;
+        vm.loading = true;
+        let cameraInput = evt.target; //document.getElementById(evt.target.id);//$(evt.target);
+        let index = cameraInput.id.substring(11);
+        let files = evt.target.files || evt.dataTransfer.files;
+        let formData = new FormData();
+        formData.append("fileData", files[0]);
+        asmxUploadFile
+          .asmxAjax("tmapUploadFile", formData, { TID: vm.param.topicMapId })
+          .then(function(resp) {
+            let result = eval("(" + resp + ")");
+            Vue.set(
+              vm.fullImageUrl,
+              index,
+              result.Results.fileHttpUrl.replace(/\\/g, "/")
+            );
+            cameraInput.value = "";
+            Vue.set(vm.configData, index, result.Results.fileUrl);
+            vm.doConfigData(); //囧，i dont konw why 搞事情
+            vm.loading = false;
+          });
+      },
+      openPicker(index) {
+        this.$refs.picker.forEach(function(picker) {
+          if (picker.$el.id == index) {
+            picker.open();
+          }
+        });
+      },
+      //时间picker
+      handleConfirm(index) {
+        let vm = this;
+        let d = new Date(vm.configSelectDiv[index]);
+        let dataFmt = vm.validation[index].dateFmt;
+        let dateTsring = "";
+        if (dataFmt.indexOf("yyyy") >= 0) {
+          dateTsring += d.getFullYear();
+        }
+        if (dataFmt.indexOf("MM") >= 0) {
+          dateTsring += "-" + (d.getMonth() + 1);
+        }
+        if (dataFmt.indexOf("dd") >= 0) {
+          dateTsring += "-" + d.getDate();
+        }
+        if (dataFmt.indexOf("HH") >= 0) {
+          dateTsring += " " + d.getHours();
+        }
+        if (dataFmt.indexOf(":mm") >= 0) {
+          dateTsring += ":" + d.getMinutes();
+        }
+        if (dataFmt.indexOf("ss") >= 0) {
+          dateTsring += ":" + d.getSeconds();
+        }
 
-      Vue.set(this.configData, index, dateTsring);
-    },
-    //照片处理
-    // vue 不能监测到数组值的变化，要用vue.set才能获取到变化操作
-    imageSheet(index) {
-      Vue.set(this.configSelectDiv, index, true);
-    },
-    deleteImage(index) {
-      Vue.set(this.fullImageUrl, index, "");
-      Vue.set(this.configData, index, "");
-    },
-    //表单验证
-    checkValidation(index) {
-      let vm = this;
-      let valid = vm.validation[index];
-      if (valid.regularExp != "") {
-        //正则校验
-        let regular = new RegExp(valid.regularExp);
-        if (!regular.test(vm.configData[index])) {
-          Toast(vm.config[index].fieldCnName + ":" + valid.tip);
+        Vue.set(this.configData, index, dateTsring);
+      },
+      //照片处理
+      // vue 不能监测到数组值的变化，要用vue.set才能获取到变化操作
+      imageSheet(index) {
+        Vue.set(this.configSelectDiv, index, true);
+      },
+      deleteImage(index) {
+        Vue.set(this.fullImageUrl, index, "");
+        Vue.set(this.configData, index, "");
+      },
+      //表单验证
+      checkValidation(index) {
+        let vm = this;
+        let valid = vm.validation[index];
+        if (valid.regularExp != "") {
+          //正则校验
+          let regular = new RegExp(valid.regularExp);
+          if (!regular.test(vm.configData[index])) {
+            Toast(vm.config[index].fieldCnName + ":" + valid.tip);
+            return false;
+          }
+        }
+        if (
+          (valid.isNull == "1" || valid.isNull == 1) &&
+          vm.configData[index] == ""
+        ) {
+          //不可为空
+          Toast(vm.config[index].fieldCnName + ":不可为空");
           return false;
         }
-      }
-      if (
-        (valid.isNull == "1" || valid.isNull == 1) &&
-        vm.configData[index] == ""
-      ) {
-        //不可为空
-        Toast(vm.config[index].fieldCnName + ":不可为空");
-        return false;
-      }
-      return true;
-    },
-    saveData() {
-      let vm = this;
-      let commit = {};
-      if (vm.param.operation == "edit") {
-        commit["OBJECTID"] = parseInt(vm.param.oid);
-      }
-      for (let i = 0, length = vm.config.length; i < length; i++) {
-        if (!vm.checkValidation(i)) {
-          return;
+        return true;
+      },
+      saveData() {
+        let vm = this;
+        let commit = {};
+        if (vm.param.operation == "edit") {
+          commit["OBJECTID"] = parseInt(vm.param.oid);
         }
-        commit[vm.config[i].fieldEnName] = vm.configData[i].toString();
+        for (let i = 0, length = vm.config.length; i < length; i++) {
+          if (!vm.checkValidation(i)) {
+            return;
+          }
+          commit[vm.config[i].fieldEnName] = vm.configData[i].toString();
+        }
+        vm.$store.commit("tmapEdit", {
+          TID: vm.param.topicMapId,
+          bsm: vm.param.bsm,
+          configData: commit,
+          method: vm.param.operation
+        });
       }
-      vm.$store.commit("tmapEdit", {
-        TID: vm.param.topicMapId,
-        bsm: vm.param.bsm,
-        configData: commit,
-        method: vm.param.operation
+    },
+    beforeCreate() {},
+    created() {},
+    destroyed() {},
+    mounted() {
+      let vm = this;
+      let url = window.location.href;
+
+      vm.param.account = regExp.GetQueryString(url, "account");
+      vm.param.password = regExp.GetQueryString(url, "password");
+      vm.param.topicMapId = regExp.GetQueryString(url, "tid");
+      vm.param.oid = regExp.GetQueryString(url, "oid");
+      vm.param.bsm = regExp.GetQueryString(url, "bsm");
+      vm.param.operation = regExp.GetQueryString(url, "operation");
+      vm.param.token = regExp.GetQueryString(url, "token");
+
+      tokenUtil.token = vm.param.token;
+
+      vm.$store.commit("requestTopicMapById", {
+        account: vm.param.account,
+        password: vm.param.password,
+        topicMapId: vm.param.topicMapId,
+        oid: vm.param.oid
+      });
+      vm.$store.commit("setUserInfo", {
+        account: vm.param.account,
+        password: vm.param.password
       });
     }
-  },
-  beforeCreate() {},
-  created() {},
-  destroyed() {},
-  mounted() {
-    let vm = this;
-    let url = window.location.href;
-
-    vm.param.account = regExp.GetQueryString(url, "account");
-    vm.param.password = regExp.GetQueryString(url, "password");
-    vm.param.topicMapId = regExp.GetQueryString(url, "tid");
-    vm.param.oid = regExp.GetQueryString(url, "oid");
-    vm.param.bsm = regExp.GetQueryString(url, "bsm");
-    vm.param.operation = regExp.GetQueryString(url, "operation");
-    vm.param.token = regExp.GetQueryString(url, "token");
-
-    tokenUtil.token = vm.param.token;
-
-    vm.$store.commit("requestTopicMapById", {
-      account: vm.param.account,
-      password: vm.param.password,
-      topicMapId: vm.param.topicMapId,
-      oid: vm.param.oid
-    });
-    vm.$store.commit("setUserInfo", {
-      account: vm.param.account,
-      password: vm.param.password
-    });
-  }
-};
+  };
 </script>
-<style lang="css" scoped>
-.topicMapEditTable {
-  overflow-y: scroll;
-}
+<style lang="css"
+       scoped>
+  .topicMapEditTable {
+    overflow-y: scroll;
+  }
 
-.configFormDiv {
-  margin-bottom: 50px;
-  position: relative;
-}
+  .configFormDiv {
+    margin-bottom: 50px;
+    position: relative;
+  }
 
-.saveButton {
-  position: fixed;
-  bottom: 0;
-  min-height: 60px;
-  border-radius: 0px;
-}
+  .saveButton {
+    position: fixed;
+    bottom: 0;
+    min-height: 60px;
+    border-radius: 0px;
+  }
 
-.uploadShowDiv {
-  /* 安卓4.4 不支持calc */
-  /* width: calc(100vw - 20px); */
-  height: 35vh;
-  min-width: 100px;
-  min-height: 100px;
-  background-color: gray;
-  margin: 0px 10px;
-}
+  .uploadShowDiv {
+    /* 安卓4.4 不支持calc */
+    /* width: calc(100vw - 20px); */
+    height: 200px;
+    background-color: gray;
+    margin: 0px 10px;
+  }
 
-.uploadImage,
-.uploadShowImage {
-  position: relative;
-  height: 100%;
-  width: auto;
-  text-align: center;
-}
+  .uploadImage,
+  .uploadShowImage {
+    position: relative;
+    height: 100%;
+    width: auto;
+    text-align: center;
+  }
 
-.uploadImage .error {
-  background-image: url("../../../static/img/x.png");
-  background-size: cover;
-  /*等比缩放*/
-  position: absolute;
-  right: -10px;
-  width: 30px;
-  height: 30px;
-  top: -10px;
-}
+  .uploadImage .error {
+    background-image: url("../../../static/img/x.png");
+    background-size: cover;
+    /*等比缩放*/
+    position: absolute;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    top: -10px;
+  }
 
-.uploadIcon {
-  position: relative;
-  cursor: pointer;
-  /* left: calc(50vw - 50px);
-  top: calc(17.5vh - 35px); */
-  top: 50%;
-  left: 50%;
-  margin: -50px 0 0 -50px;
-}
+  .uploadIcon {
+    position: relative;
+    cursor: pointer;
+    left: 50%;
+    margin-left: -50px;
+    top: 50px;
+  }
 
-.dropDown {
-  background-image: url("../../../static/img/dropDown.png");
-  background-size: cover;
-  /*等比缩放*/
-  position: absolute;
-  width: 25px;
-  height: 25px;
-  right: -5px;
-  top: -12px;
-}
-.loading {
-  color: aqua;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 30%;
-  left: 45%;
-}
-.cover{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background-color: hsla(0,0%,100%,.9);
-}
+  .dropDown {
+    background-image: url("../../../static/img/dropDown.png");
+    background-size: cover;
+    /*等比缩放*/
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    right: -5px;
+    top: -12px;
+  }
+
+  .loading {
+    color: aqua;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 30%;
+    left: 45%;
+  }
+
+  .cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: hsla(0, 0%, 100%, .9);
+  }
 </style>

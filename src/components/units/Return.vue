@@ -1,21 +1,15 @@
 <template>
   <div class="return">
-      <span class="prompt">操作成功</span>
+    <span class="prompt">操作成功</span>
   </div>
 </template>
 <script>
-import { Toast } from "../../../node_modules/mint-ui";
-
-import * as platform from "@/utils/platform.js";
-
 export default {
   name: "return",
   directives: {},
   components: {},
   data() {
     return {
-      isAndroid: false,
-      isIos: false
     };
   },
   props: {},
@@ -23,11 +17,8 @@ export default {
   watch: {},
   methods: {
     init() {
-      this.isAndroid = platform.isAndroid() && window.bridge != undefined;
-      this.isIos = platform.isIos();
-      if (this.isAndroid) {
+      if (window.bridge != undefined) {
         window.bridge.clickOnJsOfClose();
-      } else if (this.isIos) {
       }
     }
   },
