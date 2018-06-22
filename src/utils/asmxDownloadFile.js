@@ -1,6 +1,3 @@
-import {
-  Message
-} from 'element-ui';
 import tokenUtil from './tokenUtil'
 import store from '../store'
 
@@ -27,7 +24,7 @@ const asmxDownfileFile = {
     var para = JSON.stringify(config);
     var dtd = $.Deferred();
     $.ajax({
-      url: 'http://www.ztgis.com:8886/xmtdt.asmx/' + method,
+      url: 'http://www.ztgis.com:8886/xmtdt.asmx/' + method,//'http://www.ztgis.com:8000/xmtdt.asmx/'+ method,//
       type: 'get',
       datatype: 'json',
       data: {
@@ -36,11 +33,7 @@ const asmxDownfileFile = {
     }).then(function (data) {
       dtd.resolve(data);
     }, function () {
-      Message({
-        message: "下载失败，请稍后重试！",
-        type: 'warning',
-        duration: 2 * 1000
-      });
+        console.log("下载失败")
     });
     return dtd.promise();
   }

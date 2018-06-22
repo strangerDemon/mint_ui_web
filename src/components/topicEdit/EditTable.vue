@@ -239,9 +239,9 @@
         if (dataFmt.indexOf(":mm") >= 0) {
           dateTsring += ":" + d.getMinutes();
         }
-        if (dataFmt.indexOf("ss") >= 0) {
+       /* if (dataFmt.indexOf("ss") >= 0) {
           dateTsring += ":" + d.getSeconds();
-        }
+        }*/
 
         Vue.set(this.configData, index, dateTsring);
       },

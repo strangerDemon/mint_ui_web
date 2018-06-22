@@ -7,9 +7,6 @@
  * > - [axios和网络传输相关知识的学习实践](http://www.jianshu.com/p/8e5fb763c3d7)
  * > - [Vue.js REST API Consumption with Axios](https://alligator.io/vuejs/rest-api-axios/)
  */
-import {
-  Message
-} from 'element-ui';
 import querystring from 'querystring'
 import axios from 'axios'
 import tokenUtil from './tokenUtil'
@@ -18,7 +15,7 @@ import store from '../store/index.js'
 const instance = axios.create({
   // // TODO: full base url
   // baseURL: '//localhost:2080/api/',
-  baseURL: 'http://www.ztgis.com:8886/xmtdt.asmx/',
+  baseURL: 'http://www.ztgis.com:8886/xmtdt.asmx/',//'http://www.ztgis.com:8000/xmtdt.asmx/',//
   // baseURL: '//localhost:44/dist',  //发布的地址
   timeout: 60000,
   headers: {
@@ -58,22 +55,12 @@ instance.interceptors.response.use(
         return response.data.Results
       }
     } else {
-
-      Message({
-        message: response.data.RespDesc,
-        type: 'warning',
-        duration: 2 * 1000
-      });
+      console.log(response.data.RespDesc)
       return false
     }
   },
   error => {
     console.log('err' + error); // for debug
-    Message({
-      message: error.message,
-      type: 'warning',
-      duration: 3 * 1000
-    });
     return Promise.reject(error);
   }
 )

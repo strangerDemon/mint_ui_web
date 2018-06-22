@@ -1,4 +1,3 @@
-import * as country from "@/api/esriLib/init";
 import { asmx } from "@/utils";
 import { Toast } from "../../../node_modules/mint-ui";
 import Router from "@/router";
@@ -7,15 +6,9 @@ import Router from "@/router";
  * @type {Object}
  */
 const state = {
-  esriMap: null, //地图
   topicMapId: "", //当前选中的专题图id
 
   topicMap: [], //当前专题图信息
-
-  topicEditList: [], //权限专题图
-  countryMapList: [], //国家地图
-  mapList: [], //厦门图层
-  nodeList: [] //厦门注记图层
 };
 
 /**
@@ -29,16 +22,6 @@ const getters = {};
  * @type {Object}
  */
 const mutations = {
-  requsetTopicEditList(state, info) {
-    asmx
-      .post("getAuthTopicMapEditList", {
-        account: info.account,
-        password: info.password
-      })
-      .then(function(resp) {
-        state.topicEditList = resp.topicList;
-      });
-  },
 
   requestTopicMapById(state, info) {
     asmx
@@ -84,20 +67,6 @@ const mutations = {
         }
       });
   },
-
-  setMap(state, info) {
-    state.esriMap = info.map;
-  },
-
-  setTopicMapId(state, info) {
-    state.topicMapId = info.topicMapId;
-  },
-
-  setLayerList(state, info) {
-    state.mapList = info.mapList;
-    state.nodeList = info.nodeList;
-    state.countryMapList = info.countryMapList;
-  }
 };
 
 /**

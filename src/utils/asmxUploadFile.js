@@ -1,6 +1,3 @@
-import {
-  Message
-} from 'element-ui';
 import tokenUtil from './tokenUtil'
 
 const asmxUploadFile = {
@@ -9,7 +6,7 @@ const asmxUploadFile = {
     formData.append("para", JSON.stringify(config));
     var dtd = $.Deferred();
     $.ajax({
-      url: 'http://www.ztgis.com:8886/xmtdt.asmx/' + method,
+      url: 'http://www.ztgis.com:8886/xmtdt.asmx/' + method,//'http://www.ztgis.com:8000/xmtdt.asmx/'+ method,//
       type: 'post',
       data: formData,
       processData: false, //必须false才会自动加上正确的Content-Type
@@ -17,11 +14,7 @@ const asmxUploadFile = {
     }).then(function (data) {
       dtd.resolve(data);
     }, function () {
-      Message({
-        message: "上传失败，请稍后重试！",
-        type: 'warning',
-        duration: 2 * 1000
-      });
+      console.log("下载失败");
     });
     return dtd.promise();
   }

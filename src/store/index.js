@@ -1,8 +1,5 @@
 import Vue from "vue";
 import Vuex from "vuex";
-// import axios from 'axios'
-import { dojoRequire } from "esri-loader";
-import config from "../services/config.js";
 import * as modules from "./modules";
 import { asmx } from "@/utils";
 import axios from "axios";

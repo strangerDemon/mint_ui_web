@@ -30,8 +30,6 @@ module.exports = {
       'assets': resolve('src/assets'),
       'components': resolve('src/components'),
       'jquery': path.resolve(__dirname, '../static/js/jquery.min.js'),
-      'qrcode': path.resolve(__dirname, '../static/js/jquery.qrcode.min'),
-      'viewer': path.resolve(__dirname, '../static/js/viewer.min.js'),
     }
   },
   module: {
@@ -87,11 +85,6 @@ module.exports = {
       jQuery: "jquery",
       jquery: "jquery",
       "window.jQuery": "jquery",
-      qrcode: "qrcode",
-      "window.qrcode": "qrcode",
-      viewer: "viewer",
-      "window.viewer": "viewer",
-
     })
   ]
 
