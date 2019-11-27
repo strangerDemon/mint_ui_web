@@ -1,4 +1,5 @@
 import tokenUtil from './tokenUtil'
+import Config from "@/services";
 
 const asmxUploadFile = {
   asmxAjax: function (method, formData,config) {
@@ -6,7 +7,7 @@ const asmxUploadFile = {
     formData.append("para", JSON.stringify(config));
     var dtd = $.Deferred();
     $.ajax({
-      url: 'http://www.ztgis.com:8886/xmtdt.asmx/' + method,//'http://www.ztgis.com:8000/xmtdt.asmx/'+ method,//
+      url:  Config.API_URL+method,//'http://map.xmtfj.gov.cn:8004/xmtdt.asmx/' + method,//'http://www.ztgis.com:8000/xmtdt.asmx/'+ method,//
       type: 'post',
       data: formData,
       processData: false, //必须false才会自动加上正确的Content-Type

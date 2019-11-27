@@ -10,27 +10,27 @@ checklist，uploadImage ）
 
 ProgressWebView webview = (ProgressWebView) findViewById(R.id.topicEditWebView);
 
-//webview 的设置 
-WebSettings webSettings = webview.getSettings(); 
+## webview 的设置
+WebSettings webSettings = webview.getSettings();
 
-// 允许 js 交互
-webSettings.setJavaScriptEnabled(true); 
+## 允许 js 交互
+webSettings.setJavaScriptEnabled(true);
 webview.addJavascriptInterface( this,"bridge");
 
-//js 交互函数
+## js 交互函数
 @JavascriptInterface
 public void clickOnJsOfClose(){
     finish();
 }
 
-//重载 setWebChromeClient
+## 重载 setWebChromeClient
 webview.setWebChromeClient(new WebChromeClient() {
     @Override
     public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
     }
 );
 
-list:
+# list:
 
 ![image](https://github.com/strangerDemon/mint_ui_web/blob/master/gif/list.gif)
 

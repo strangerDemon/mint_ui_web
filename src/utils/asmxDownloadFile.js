@@ -1,5 +1,6 @@
 import tokenUtil from './tokenUtil'
 import store from '../store'
+import Config from "@/services";
 
 const asmxDownfileFile = {
   asmxAjax: function (method, config) {
@@ -10,21 +11,21 @@ const asmxDownfileFile = {
     form.attr("style", "display:none");
     form.attr("target", "_self");
     form.attr("method", "get");
-    form.attr("action", "http://www.ztgis.com:8886/xmtdt.asmx/unifiedFileDownLoad");
+    form.attr("action", Config.API_URL+"unifiedFileDownLoad");//"http://map.xmtfj.gov.cn:8004/xmtdt.asmx/unifiedFileDownLoad");
     var input1 = $("<input>");
     input1.attr("type", "hidden");
     input1.attr("name", "para");
     input1.attr("value", para);
     $("body").append(form); //将表单放置在web中
     form.append(input1);
-    form.submit(); //表单提交 
+    form.submit(); //表单提交
   },
   validateFileAuth: function (method, config) {
     config["Token"] = tokenUtil.token;
     var para = JSON.stringify(config);
     var dtd = $.Deferred();
     $.ajax({
-      url: 'http://www.ztgis.com:8886/xmtdt.asmx/' + method,//'http://www.ztgis.com:8000/xmtdt.asmx/'+ method,//
+      url: 'http://map.xmtfj.gov.cn:8004/xmtdt.asmx/' + method,//'http://www.ztgis.com:8000/xmtdt.asmx/'+ method,//
       type: 'get',
       datatype: 'json',
       data: {

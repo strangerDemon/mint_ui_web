@@ -11,11 +11,12 @@ import querystring from 'querystring'
 import axios from 'axios'
 import tokenUtil from './tokenUtil'
 import store from '../store/index.js'
+import Config from "@/services";
 
 const instance = axios.create({
   // // TODO: full base url
   // baseURL: '//localhost:2080/api/',
-  baseURL: 'http://www.ztgis.com:8886/xmtdt.asmx/',//'http://www.ztgis.com:8000/xmtdt.asmx/',//
+  baseURL: Config.API_URL,//'http://map.xmtfj.gov.cn:8004/xmtdt.asmx/',//'http://www.ztgis.com:8886/xmtdt.asmx/',//
   // baseURL: '//localhost:44/dist',  //发布的地址
   timeout: 60000,
   headers: {
